@@ -11,20 +11,22 @@ const roboto = Roboto({
 
 let theme = createTheme({
   palette: {
+    mode: "dark",
     primary: {
-      main: "#f67906",
+      main: "#fb8830", // Warna utama aksen oren
     },
     secondary: {
-      main: "#fb8830",
+      main: "#f67906", // Warna sekunder aksen oren lebih gelap
     },
     background: {
-      default: "#121212",
-      paper: "#282828",
+      default: "#121212", // Warna gelap khas dark mode
+      paper: "#1e1e1e", // Warna untuk card atau container
     },
     text: {
-      primary: "#ffffff",
-      secondary: "#121212",
+      primary: "#ffffff", // Teks utama tetap putih
+      secondary: "#b0b0b0", // Teks sekunder abu-abu agar tidak terlalu kontras
     },
+    divider: "#f67906", // Divider dengan aksen oren
   },
   typography: {
     fontFamily: roboto.style.fontFamily,

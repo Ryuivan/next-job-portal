@@ -1,10 +1,10 @@
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 export default function Home() {
 
   return (
-    <Box>
+    <Typography color="text.primary">
       Hello World
-    </Box>      
+    </Typography>      
   );
 }

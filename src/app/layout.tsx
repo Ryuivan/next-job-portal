@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import ThemeRegistry from "@/component/theme/ThemeRegistry";
+import { Container } from "@mui/material";
+import Sidebar from "@/component/ui/sidebar/Sidebar";
+import AppProvider from "@/component/app/AppProvider";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,7 +17,19 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <ThemeRegistry>{children}</ThemeRegistry>
+        <AppProvider>
+          <Sidebar />
+          <Container
+            maxWidth="xl"
+            disableGutters
+            sx={{
+              color: "text.primary",
+              backgroundColor: "background.default",
+            }}
+          >
+            {children}
+          </Container>
+        </AppProvider>
       </body>
     </html>
   );
