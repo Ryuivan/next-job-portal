@@ -1,24 +1,28 @@
 "use client";
 
-import axiosInstance from "@/lib/axios/axiosInstance";
-import { LoginCredentials, LoginResponse } from "@/types/LoginCredentials";
+import { getUserProfile, loginUser } from "@/services/authService";
 import { User } from "@/types/User";
-import { AxiosError, AxiosResponse } from "axios";
-import { Dispatch, ReactNode, useContext, useEffect, useReducer } from "react";
+import { Dispatch, ReactNode, useEffect, useReducer } from "react";
 import { createContext } from "react";
 
 type AuthState = {
   isAuthenticated: boolean;
   user: Omit<User, "password"> | null;
+  loading: boolean;
+  error: string | null;
 };
 
 type AuthAction =
   | { type: "LOGIN"; payload: Omit<User, "password"> }
-  | { type: "LOGOUT" };
+  | { type: "LOGOUT" }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_ERROR"; payload: string | null };
 
 const initialAuthState: AuthState = {
   isAuthenticated: false,
   user: null,
+  loading: false,
+  error: null,
 };
 
 const authReducer = (state: AuthState, action: AuthAction): AuthState => {
@@ -27,12 +31,28 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       return {
         isAuthenticated: true,
         user: action.payload,
+        loading: false,
+        error: null,
       };
 
     case "LOGOUT":
       return {
         isAuthenticated: false,
         user: null,
+        loading: false,
+        error: null,
+      };
+
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: action.payload,
+      };
+
+    case "SET_ERROR":
+      return {
+        ...state,
+        error: action.payload,
       };
 
     default:
@@ -40,45 +60,52 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   }
 };
 
-type AuthContextType = {
+export type AuthContextType = {
   state: AuthState;
-  login: (loginCredentials: LoginCredentials) => Promise<void>;
+  login: (loginCredentials: Pick<User, "email" | "password">) => Promise<void>;
   logout: () => void;
   dispatch: Dispatch<AuthAction>;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
-  const login = async (loginCredentials: LoginCredentials) => {
+  const handleError = (err: unknown) => {
+    const errorMessage =
+      err instanceof Error ? err.message : "An unknown error occurred.";
+    dispatch({ type: "SET_ERROR", payload: errorMessage });
+  };
+
+  const login = async (loginCredentials: Pick<User, "email" | "password">) => {
+    dispatch({ type: "SET_ERROR", payload: null });
+  
     try {
-      const response: AxiosResponse<LoginResponse> = await axiosInstance.post(
-        "/login",
-        loginCredentials,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      const { token, user } = response.data;
-
+      const response = await loginUser(loginCredentials);
+  
+      if (!response) {
+        throw new Error("Login failed: No response from server");
+      }
+  
+      const { token, user } = response;
+    
       sessionStorage.setItem("token", token);
+      localStorage.setItem("auth", JSON.stringify(user));
+  
       dispatch({
         type: "LOGIN",
         payload: user,
       });
-    } catch (error) {
-      const err = error as AxiosError<{ message: string }>;
-      throw new Error(err.response?.data?.message ?? "Login failed.");
+    } catch (err: any) {
+      throw err;  
     }
   };
+  
 
   const logout = () => {
     sessionStorage.removeItem("token");
+    localStorage.removeItem("auth");
     dispatch({ type: "LOGOUT" });
   };
 
@@ -86,43 +113,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const token = sessionStorage.getItem("token");
 
     if (token) {
-      axiosInstance
-        .get<{ user: Omit<User, "password"> }>("/user", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      getUserProfile(token)
+        .then((user) => {
+          console.log("User fetched from profile:", user);
+          dispatch({ type: "LOGIN", payload: user });
         })
-        .then((response) => {
-          dispatch({
-            type: "LOGIN",
-            payload: response.data.user,
-          });
-        })
-        .catch(() => logout());
+        .catch((err) => {
+          handleError(err);
+          logout();
+        });
     }
   }, []);
-
-  useEffect(() => {
-    if (state.isAuthenticated) {
-      localStorage.setItem("auth", JSON.stringify(state));
-    } else {
-      localStorage.removeItem("auth");
-    }
-  }, [state]);
 
   return (
     <AuthContext.Provider value={{ state, dispatch, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-
-  return context;
 };

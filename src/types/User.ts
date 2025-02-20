@@ -4,7 +4,7 @@ export type User = {
   lastName: string;
   email: string;
   password: string;
-  role: "jobseeker" | "employer" | "Admin";
-  createdAt: Date;
-  updatedAt: Date;
+  role: "jobseeker" | "employer";
+  createdAt?: Date;
+  updatedAt?: Date;
 };

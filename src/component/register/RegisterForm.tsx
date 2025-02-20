@@ -1,11 +1,10 @@
 "use client";
 
-import axiosInstance from "@/lib/axios/axiosInstance";
 import { makeErrorToast, makeSuccessToast } from "@/lib/toast/toast";
 import {
   RegisterFormData,
   registerFormSchema,
-} from "@/lib/zod/RegisterFormData";
+} from "@/lib/zod/auth/RegisterFormData";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Box,
@@ -18,12 +17,15 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import axios from "axios";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import FormTitle from "../ui/title/FormTitle";
+import { useRouter } from "next/navigation";
+import { createUser } from "@/services/userService";
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
 
   const {
     register,
@@ -38,19 +40,11 @@ const RegisterForm = () => {
     setLoading(true);
 
     try {
-      await axiosInstance.post("/users", data, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
+      await createUser(data);
+      router.push("/login");
       makeSuccessToast("Register successful");
     } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        makeErrorToast(err.response.data.error || "An error occurred");
-      } else {
-        makeErrorToast("An unexpected error occurred");
-      }
+      makeErrorToast(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -69,6 +63,8 @@ const RegisterForm = () => {
         borderRadius: "8px",
       }}
     >
+      <FormTitle title="Account Registration" />
+
       <Stack
         direction={{ xs: "column", sm: "row" }}
         spacing={2}

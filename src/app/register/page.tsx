@@ -1,14 +1,13 @@
 import RegisterForm from "@/component/register/RegisterForm";
-import { Box, Container } from "@mui/material";
+import { Container, Stack } from "@mui/material";
 
 const RegisterPage = () => {
   return (
-    <Box>
-      <h1>Register</h1>
+    <Stack justifyContent="center" alignItems="center" height="80vh">
       <Container maxWidth="sm">
         <RegisterForm />
       </Container>
-    </Box>
+    </Stack>
   );
 };
 

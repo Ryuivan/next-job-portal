@@ -1,19 +1,24 @@
 "use client";
 
-import { useAuth } from "@/context/AuthContext";
-import axiosInstance from "@/lib/axios/axiosInstance";
 import { makeErrorToast, makeSuccessToast } from "@/lib/toast/toast";
-import { LoginFormData, loginFormSchema } from "@/lib/zod/LoginFormData";
+import { LoginFormData, loginFormSchema } from "@/lib/zod/auth/LoginFormData";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, TextField } from "@mui/material";
-import axios from "axios";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import FormTitle from "../ui/title/FormTitle";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 const LoginForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
+  const router = useRouter();
 
-  const { login } = useAuth();
+  const {
+    login,
+    state: { isAuthenticated },
+  } = useAuth();
+
   const {
     register,
     handleSubmit,
@@ -22,14 +27,22 @@ const LoginForm = () => {
     resolver: zodResolver(loginFormSchema),
   });
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.replace("/jobs");
+    }
+  }, [isAuthenticated, router]);
+
   const onSubmit = async (data: LoginFormData) => {
     setLoading(true);
 
     try {
       await login(data);
       makeSuccessToast("Login successful");
+
+      return router.push("/jobs");
     } catch (err: any) {
-      makeErrorToast(err.message || "An error occurred");
+      makeErrorToast(err?.message || "Invalid email or password");
     } finally {
       setLoading(false);
     }
@@ -48,6 +61,8 @@ const LoginForm = () => {
         borderRadius: "8px",
       }}
     >
+      <FormTitle title="Login" />
+
       <TextField
         label="Email"
         variant="outlined"
