@@ -1,14 +1,14 @@
 import LoginForm from "@/component/login/LoginForm";
-import { Box, Container } from "@mui/material";
+import { Container, Stack } from "@mui/material";
 
 const LoginPage = () => {
   return (
-    <Box>
+    <Stack justifyContent="center" alignItems="center" height="80vh">
       <Container maxWidth="sm">
         <LoginForm />
       </Container>
-    </Box>
-  )
-}
+    </Stack>
+  );
+};
 
 export default LoginPage;

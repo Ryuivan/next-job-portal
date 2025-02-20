@@ -14,7 +14,9 @@ import { ReactNode, useCallback, useMemo, useState } from "react";
 import SidebarDrawer from "./SidebarDrawer";
 import Logo from "../logo/Logo";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
+import { makeSuccessToast } from "@/lib/toast/toast";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export type Route = {
   name: string;
@@ -24,14 +26,20 @@ export type Route = {
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
-  const {
-    state: { isAuthenticated },
-    logout
-  } = useAuth();
+  const { state, logout } = useAuth();
+  const { isAuthenticated } = state;
+  console.log(isAuthenticated);
+  const router = useRouter();
 
   const drawerWidth = 300;
   const handleOpenDrawer = useCallback(() => setOpen(true), []);
   const handleCloseDrawer = useCallback(() => setOpen(false), []);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+    makeSuccessToast("Logout success");
+  };
 
   const routes = useMemo<Route[]>(
     () => [
@@ -52,7 +60,12 @@ const Sidebar = () => {
         }}
       >
         <Container maxWidth="xl" disableGutters>
-          <Toolbar disableGutters>
+          <Toolbar
+            disableGutters
+            sx={{
+              width: "100%",
+            }}
+          >
             <Stack
               direction="row"
               justifyContent="space-between"
@@ -60,38 +73,58 @@ const Sidebar = () => {
               sx={{ width: "100%" }}
             >
               {/* Tombol Menu */}
-              <IconButton
-                color="secondary"
-                onClick={handleOpenDrawer}
-                edge="start"
+              <Stack
+                direction="row"
+                justifyContent="flex-start"
+                alignItems="center"
+                flex={1}
               >
-                <ChevronRight />
-              </IconButton>
+                <IconButton
+                  color="secondary"
+                  onClick={handleOpenDrawer}
+                  edge="start"
+                >
+                  <ChevronRight />
+                </IconButton>
+              </Stack>
 
               {/* Logo */}
-              <Logo />
+              <Box
+                sx={{
+                  flex: 1,
+                }}
+              >
+                <Logo />
+              </Box>
 
-              {/* Tombol Login */}
-              {isAuthenticated ? (
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  startIcon={<AccountCircle />}
-                  onClick={logout}
-                >
-                  LOGOUT
-                </Button>
-              ) : (
-                <Link href="/login" style={{ textDecoration: "none" }}>
+              <Stack
+                direction="row"
+                justifyContent="flex-end"
+                alignItems="center"
+                flex={1}
+              >
+                {/* Tombol Login */}
+                {isAuthenticated ? (
                   <Button
                     variant="outlined"
                     color="secondary"
                     startIcon={<AccountCircle />}
+                    onClick={handleLogout}
                   >
-                    LOGIN
+                    LOGOUT
                   </Button>
-                </Link>
-              )}
+                ) : (
+                  <Link href="/login" style={{ textDecoration: "none" }}>
+                    <Button
+                      variant="outlined"
+                      color="secondary"
+                      startIcon={<AccountCircle />}
+                    >
+                      LOGIN
+                    </Button>
+                  </Link>
+                )}
+              </Stack>
             </Stack>
           </Toolbar>
         </Container>

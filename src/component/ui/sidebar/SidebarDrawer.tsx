@@ -52,8 +52,8 @@ const SidebarDrawer = ({
       {/* Navigasi Menu */}
       <Box component="nav">
         {routes.map(({ name, href, icon }: Route) => (
-          <ListItem key={href}>
-            <ListItemButton component={Link} href={href}>
+          <ListItem key={href} >
+            <ListItemButton component={Link} href={href} onClick={handleCloseDrawer}>
               <ListItemIcon>{icon}</ListItemIcon>
               <Typography fontWeight={500}>{name}</Typography>
             </ListItemButton>
