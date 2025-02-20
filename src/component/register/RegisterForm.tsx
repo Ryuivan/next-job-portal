@@ -1,6 +1,7 @@
 "use client";
 
 import axiosInstance from "@/lib/axios/axiosInstance";
+import { makeErrorToast, makeSuccessToast } from "@/lib/toast/toast";
 import {
   RegisterFormData,
   registerFormSchema,
@@ -17,12 +18,12 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import axios from "axios";
 import { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
@@ -35,19 +36,21 @@ const RegisterForm = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     setLoading(true);
-    setError(null);
 
     try {
-      const response = await axiosInstance.post("/users", data, {
+      await axiosInstance.post("/users", data, {
         headers: {
           "Content-Type": "application/json",
         },
       });
 
-      console.log("users success");
-      console.log(response.data);
-    } catch (error) {
-      setError((error as Error).message || "An error occurred");
+      makeSuccessToast("Register successful");
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        makeErrorToast(err.response.data.error || "An error occurred");
+      } else {
+        makeErrorToast("An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -75,6 +78,7 @@ const RegisterForm = () => {
       >
         <TextField
           label="First Name"
+          variant="outlined"
           fullWidth
           type="text"
           {...register("firstName")}
@@ -83,6 +87,7 @@ const RegisterForm = () => {
         />
         <TextField
           label="Last Name"
+          variant="outlined"
           fullWidth
           type="text"
           {...register("lastName")}
@@ -93,6 +98,7 @@ const RegisterForm = () => {
 
       <TextField
         label="Email"
+        variant="outlined"
         fullWidth
         type="email"
         {...register("email")}
@@ -105,6 +111,7 @@ const RegisterForm = () => {
 
       <TextField
         label="Password"
+        variant="outlined"
         fullWidth
         type="password"
         {...register("password")}
@@ -117,6 +124,7 @@ const RegisterForm = () => {
 
       <FormControl
         fullWidth
+        variant="outlined"
         error={!!errors.role}
         sx={{ marginBottom: "16px" }}
       >
@@ -124,6 +132,7 @@ const RegisterForm = () => {
         <Controller
           name="role"
           control={control}
+          defaultValue="jobseeker"
           render={({ field }) => (
             <Select {...field} label="Role">
               <MenuItem value="jobseeker">Job Seeker</MenuItem>
@@ -144,7 +153,13 @@ const RegisterForm = () => {
         )}
       </FormControl>
 
-      <Button type="submit" variant="contained" color="primary" fullWidth>
+      <Button
+        type="submit"
+        variant="contained"
+        color="primary"
+        fullWidth
+        loading={loading}
+      >
         Register
       </Button>
     </Box>

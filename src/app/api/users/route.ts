@@ -35,7 +35,7 @@ export const POST = async (req: Request) => {
     }
 
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = bcrypt.hash(password, salt);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
     await query(
       "INSERT INTO users (first_name, last_name, email, password, role) VALUES ($1, $2, $3, $4, $5)",

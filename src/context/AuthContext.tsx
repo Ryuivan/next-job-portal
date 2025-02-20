@@ -1,24 +1,20 @@
 "use client";
 
+import axiosInstance from "@/lib/axios/axiosInstance";
+import { LoginCredentials, LoginResponse } from "@/types/LoginCredentials";
+import { User } from "@/types/User";
+import { AxiosError, AxiosResponse } from "axios";
 import { Dispatch, ReactNode, useContext, useEffect, useReducer } from "react";
 import { createContext } from "react";
 
-type User = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  role: "jobseeker" | "employer";
-  createdAt: Date;
-  updatedAt: Date;
-};
-
 type AuthState = {
   isAuthenticated: boolean;
-  user: User | null;
+  user: Omit<User, "password"> | null;
 };
 
-type AuthAction = { type: "LOGIN"; payload: User } | { type: "LOGOUT" };
+type AuthAction =
+  | { type: "LOGIN"; payload: Omit<User, "password"> }
+  | { type: "LOGOUT" };
 
 const initialAuthState: AuthState = {
   isAuthenticated: false,
@@ -46,6 +42,8 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
 
 type AuthContextType = {
   state: AuthState;
+  login: (loginCredentials: LoginCredentials) => Promise<void>;
+  logout: () => void;
   dispatch: Dispatch<AuthAction>;
 };
 
@@ -54,20 +52,53 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
-  useEffect(() => {
-    const savedAuth = localStorage.getItem("auth");
+  const login = async (loginCredentials: LoginCredentials) => {
+    try {
+      const response: AxiosResponse<LoginResponse> = await axiosInstance.post(
+        "/login",
+        loginCredentials,
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
-    if (savedAuth) {
-      const parsedAuth = JSON.parse(savedAuth);
+      const { token, user } = response.data;
 
+      sessionStorage.setItem("token", token);
       dispatch({
         type: "LOGIN",
-        payload: {
-          ...parsedAuth.user,
-          createdAt: new Date(parsedAuth.user.createdAt),
-          updatedAt: new Date(parsedAuth.user.updatedAt),
-        },
+        payload: user,
       });
+    } catch (error) {
+      const err = error as AxiosError<{ message: string }>;
+      throw new Error(err.response?.data?.message ?? "Login failed.");
+    }
+  };
+
+  const logout = () => {
+    sessionStorage.removeItem("token");
+    dispatch({ type: "LOGOUT" });
+  };
+
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+
+    if (token) {
+      axiosInstance
+        .get<{ user: Omit<User, "password"> }>("/user", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((response) => {
+          dispatch({
+            type: "LOGIN",
+            payload: response.data.user,
+          });
+        })
+        .catch(() => logout());
     }
   }, []);
 
@@ -80,13 +111,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, [state]);
 
   return (
-    <AuthContext.Provider value={{ state, dispatch }}>
+    <AuthContext.Provider value={{ state, dispatch, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => {
+export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
 
   if (!context) {

@@ -14,6 +14,7 @@ import { ReactNode, useCallback, useMemo, useState } from "react";
 import SidebarDrawer from "./SidebarDrawer";
 import Logo from "../logo/Logo";
 import Link from "next/link";
+import { useAuth } from "@/context/AuthContext";
 
 export type Route = {
   name: string;
@@ -23,8 +24,12 @@ export type Route = {
 
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
-  const drawerWidth = 300;
+  const {
+    state: { isAuthenticated },
+    logout
+  } = useAuth();
 
+  const drawerWidth = 300;
   const handleOpenDrawer = useCallback(() => setOpen(true), []);
   const handleCloseDrawer = useCallback(() => setOpen(false), []);
 
@@ -43,7 +48,7 @@ const Sidebar = () => {
         sx={{
           backgroundColor: "background.paper",
           color: "text.primary",
-          padding: "4px 0"
+          padding: "4px 0",
         }}
       >
         <Container maxWidth="xl" disableGutters>
@@ -67,15 +72,26 @@ const Sidebar = () => {
               <Logo />
 
               {/* Tombol Login */}
-              <Link href="/login" style={{ textDecoration: "none" }}>
+              {isAuthenticated ? (
                 <Button
                   variant="outlined"
                   color="secondary"
                   startIcon={<AccountCircle />}
+                  onClick={logout}
                 >
-                  LOGIN
+                  LOGOUT
                 </Button>
-              </Link>
+              ) : (
+                <Link href="/login" style={{ textDecoration: "none" }}>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    startIcon={<AccountCircle />}
+                  >
+                    LOGIN
+                  </Button>
+                </Link>
+              )}
             </Stack>
           </Toolbar>
         </Container>
