@@ -1,13 +1,15 @@
-"use server"
+"use server";
 
 import {
   getJobsFromTable,
   insertJobToTable,
   updateJobInTable,
   deleteJobFromTable,
-  getJobByIdFromTable,
+  getJobAndUserByIdFromTable,
+  getJobsAndUserFromTable,
 } from "@/repositories/jobRepository";
 import { Job } from "@/types/Job";
+import { User } from "@/types/User";
 
 const validateJob = (job: Partial<Job>) => {
   const { userId, title, description, category, location, salary } = job;
@@ -53,8 +55,20 @@ export const getAllJobs = async (): Promise<Job[] | null> => {
   return jobs;
 };
 
-export const getJobById = async (id: string): Promise<Job | null> => {
-  const job = await getJobByIdFromTable(id);
+export const getAllJobsAndUserName = async (): Promise<
+  (Omit<Job, "userId"> & Pick<User, "firstName" | "lastName">)[] | null
+> => {
+  const jobs = await getJobsAndUserFromTable();
+
+  if (jobs.length === 0) {
+    throw new Error("No jobs found.");
+  }
+
+  return jobs;
+};
+
+export const getJobAndUserById = async (id: string): Promise<Omit<Job, "userId"> & Pick<User, "firstName" | "lastName"> | null> => {
+  const job = await getJobAndUserByIdFromTable(id);
 
   if (!job) {
     throw new Error("Job not found.");

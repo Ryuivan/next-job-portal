@@ -9,7 +9,14 @@ import {
   Stack,
   Toolbar,
 } from "@mui/material";
-import { ChevronRight, AccountCircle, Home, Work } from "@mui/icons-material";
+import {
+  ChevronRight,
+  AccountCircle,
+  Home,
+  Work,
+  LibraryAdd,
+  WorkHistory,
+} from "@mui/icons-material";
 import { ReactNode, useCallback, useMemo, useState } from "react";
 import SidebarDrawer from "./SidebarDrawer";
 import Logo from "../logo/Logo";
@@ -28,7 +35,6 @@ const Sidebar = () => {
   const [open, setOpen] = useState(false);
   const { state, logout } = useAuth();
   const { isAuthenticated } = state;
-  console.log(isAuthenticated);
   const router = useRouter();
 
   const drawerWidth = 300;
@@ -45,6 +51,22 @@ const Sidebar = () => {
     () => [
       { name: "Home", href: "/", icon: <Home /> },
       { name: "Jobs", href: "/jobs", icon: <Work /> },
+    ],
+    []
+  );
+
+  const employerRoutes = useMemo<Route[]>(
+    () => [{ name: "Create Job", href: "/jobs/create", icon: <LibraryAdd /> }],
+    []
+  );
+
+  const jobseekerRoutes = useMemo<Route[]>(
+    () => [
+      {
+        name: "Application History",
+        href: "/applications",
+        icon: <WorkHistory />,
+      },
     ],
     []
   );
@@ -135,6 +157,8 @@ const Sidebar = () => {
         drawerWidth={drawerWidth}
         open={open}
         routes={routes}
+        employerRoutes={employerRoutes}
+        jobseekerRoutes={jobseekerRoutes}
         handleCloseDrawer={handleCloseDrawer}
       />
     </>

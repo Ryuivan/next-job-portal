@@ -7,7 +7,9 @@ const AppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ThemeRegistry>
       <AuthProvider>
-        <JobsProvider>{children}</JobsProvider>
+        {/* <JobsProvider> */}
+        {children}
+        {/* </JobsProvider> */}
       </AuthProvider>
     </ThemeRegistry>
   );

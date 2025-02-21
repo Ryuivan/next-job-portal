@@ -4,10 +4,11 @@ import {
   createJob,
   deleteJob,
   getAllJobs,
-  getJobById,
+  getJobAndUserById,
   updateJob,
 } from "@/services/jobService";
 import { Job } from "@/types/Job";
+import { User } from "@/types/User";
 import {
   createContext,
   ReactNode,
@@ -26,7 +27,7 @@ type JobState = {
 
 type JobAction =
   | { type: "SET_JOBS"; payload: Job[] }
-  | { type: "SET_JOB_DETAIL"; payload: Job }
+  | { type: "SET_JOB_DETAIL"; payload: Omit<Job, "userId"> & Pick<User, "firstName" | "lastName"> }
   | { type: "ADD_JOB"; payload: Job }
   | { type: "UPDATE_JOB"; payload: Job }
   | { type: "REMOVE_JOB"; payload: string }
@@ -45,17 +46,17 @@ const jobsReducer = (state: JobState, action: JobAction): JobState => {
     case "SET_JOBS":
       return { ...state, jobs: action.payload, loading: false, error: null };
 
-    case "SET_JOB_DETAIL":
-      return {
-        ...state,
-        jobs: state.jobs.some((job) => job.id === action.payload.id)
-          ? state.jobs.map((job) =>
-              job.id === action.payload.id ? action.payload : job
-            )
-          : [...state.jobs, action.payload],
-        loading: false,
-        error: null,
-      };
+    // case "SET_JOB_DETAIL":
+    //   return {
+    //     ...state,
+    //     jobs: state.jobs.some((job) => job.id === action.payload.id)
+    //       ? state.jobs.map((job) =>
+    //           job.id === action.payload.id ? action.payload : job
+    //         )
+    //       : [...state.jobs, action.payload],
+    //     loading: false,
+    //     error: null,
+    //   };
 
     case "ADD_JOB":
       return { ...state, jobs: [action.payload, ...state.jobs], error: null };
@@ -134,7 +135,7 @@ export const JobsProvider = ({
   const fetchJobDetail = async (id: string) => {
     dispatch({ type: "SET_LOADING", payload: true });
     try {
-      const job = await getJobById(id);
+      const job = await getJobAndUserById(id);
       if (job) dispatch({ type: "SET_JOB_DETAIL", payload: job });
       else throw new Error("Job not found.");
     } catch (err) {
