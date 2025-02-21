@@ -2,7 +2,7 @@
 
 import { Box, Button, TextareaAutosize, TextField } from "@mui/material";
 import FormTitle from "../ui/title/FormTitle";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   CreateJobFormData,
@@ -29,8 +29,6 @@ export const CreateJobForm = () => {
   });
 
   const onSubmit = async (data: CreateJobFormData) => {
-    console.log("Submitting:", data);
-
     setLoading(true);
     try {
       const result = await createJobAction({ ...data, userId: userId! });

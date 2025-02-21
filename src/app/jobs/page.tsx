@@ -1,16 +1,24 @@
 import JobList from "@/component/job/JobList";
 import PageTitle from "@/component/ui/title/PageTitle";
-import { Box, Grid2 } from "@mui/material";
-import { getJobsAndUserName } from "../lib/job/actions";
+import { Box, Grid2, Typography } from "@mui/material";
+import { getJobsAndUserNameAction } from "../lib/job/actions";
 
 const JobsPage = async () => {
-  const jobs = await getJobsAndUserName();
+  const jobs = await getJobsAndUserNameAction();
+
+  if (!jobs || "error" in jobs) {
+    return (
+      <Typography color="error" textAlign="center" marginTop={4}>
+        {jobs?.error ?? "Failed to fetch job details."}
+      </Typography>
+    );
+  }
 
   return (
     <Box>
       <PageTitle title="Job List" />
       <Grid2 container spacing={2}>
-        <JobList jobs={jobs || { error: "No jobs available" }} />
+        <JobList jobs={jobs.data} />
       </Grid2>
     </Box>
   );
