@@ -4,13 +4,15 @@ import { Grid2, Typography } from "@mui/material";
 import JobCard from "./JobCard";
 
 type JobListProps = {
-  jobs: (Omit<Job, "userId"> & Pick<User, "firstName" | "lastName">)[] | null;
+  jobs:
+    | (Omit<Job, "userId"> & Pick<User, "firstName" | "lastName">)[]
+    | { error: string };
 };
 
 export const JobList = ({ jobs }: JobListProps) => {
   return (
     <>
-      {jobs ? (
+      {Array.isArray(jobs) ? (
         jobs.map(({ id, title, firstName, lastName, createdAt }) => {
           return (
             <Grid2
@@ -37,7 +39,7 @@ export const JobList = ({ jobs }: JobListProps) => {
           );
         })
       ) : (
-        <Typography>No jobs found</Typography>
+        <Typography>{jobs.error}</Typography>
       )}
     </>
   );

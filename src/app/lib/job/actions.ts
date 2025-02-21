@@ -1,7 +1,12 @@
 "use server";
 
-import { getJobsByUserIdFromTable, insertJobToTable } from "@/repositories/jobRepository";
+import {
+  getJobsAndUserFromTable,
+  getJobsByUserIdFromTable,
+  insertJobToTable,
+} from "@/repositories/jobRepository";
 import { Job } from "@/types/Job";
+import { User } from "@/types/User";
 
 type CreateJobActionRequest = {
   userId: string;
@@ -46,7 +51,7 @@ const validateJob = (job: Partial<Job>) => {
   return true;
 };
 
-export async function createJobAction(formData: CreateJobActionRequest) {
+export const createJobAction = async (formData: CreateJobActionRequest) => {
   try {
     validateJob(formData);
 
@@ -57,7 +62,18 @@ export async function createJobAction(formData: CreateJobActionRequest) {
       error: error instanceof Error ? error.message : "Failed to create job",
     };
   }
-}
+};
+
+export const getJobsAndUserName = async () => {
+  try {
+    const jobsAndUsername = await getJobsAndUserFromTable();
+    return jobsAndUsername;
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Failed to fetch jobs",
+    };
+  }
+};
 
 export async function getJobsByUserIdAction(userId: string) {
   try {
