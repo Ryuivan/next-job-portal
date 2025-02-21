@@ -2,7 +2,7 @@
 
 import { Box, Button, TextareaAutosize, TextField } from "@mui/material";
 import FormTitle from "../ui/title/FormTitle";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   CreateJobFormData,
@@ -11,16 +11,15 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { makeErrorToast, makeSuccessToast } from "@/lib/toast/toast";
-import { useJobs } from "@/hooks/useJobs";
 import { useAuth } from "@/hooks/useAuth";
+import { createJobAction } from "@/app/lib/job/actions";
 
 export const CreateJobForm = () => {
   const [loading, setLoading] = useState<boolean>(false);
-  const { createNewJob } = useJobs();
   const { state } = useAuth();
   const userId = state.user?.id;
-
   const { push } = useRouter();
+
   const {
     register,
     handleSubmit,
@@ -30,19 +29,19 @@ export const CreateJobForm = () => {
   });
 
   const onSubmit = async (data: CreateJobFormData) => {
+    console.log("Submitting:", data);
+
     setLoading(true);
-
     try {
-      if (!userId) {
-        throw new Error("User ID is required");
+      const result = await createJobAction({ ...data, userId: userId! });
+      if (result?.error) {
+        makeErrorToast(result.error);
+      } else {
+        makeSuccessToast("Job created successfully");
+        push("/jobs");
       }
-
-      const job = { ...data, userId };
-      await createNewJob(job);
-      makeSuccessToast("Job created successfully");
-      push("/jobs");
     } catch (err) {
-      makeErrorToast(err instanceof Error ? err.message : "An error occurred");
+      makeErrorToast("Failed to create job");
     } finally {
       setLoading(false);
     }

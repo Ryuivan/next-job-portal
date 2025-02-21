@@ -72,36 +72,26 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(authReducer, initialAuthState);
 
-  const handleError = (err: unknown) => {
-    const errorMessage =
-      err instanceof Error ? err.message : "An unknown error occurred.";
-    dispatch({ type: "SET_ERROR", payload: errorMessage });
-  };
-
   const login = async (loginCredentials: Pick<User, "email" | "password">) => {
     dispatch({ type: "SET_ERROR", payload: null });
-  
+
     try {
       const response = await loginUser(loginCredentials);
-  
+
       if (!response) {
         throw new Error("Login failed: No response from server");
       }
-  
+
       const { token, user } = response;
-    
+
       sessionStorage.setItem("token", token);
       localStorage.setItem("auth", JSON.stringify(user));
-  
-      dispatch({
-        type: "LOGIN",
-        payload: user,
-      });
+
+      dispatch({ type: "LOGIN", payload: user });
     } catch (err: any) {
-      throw err;  
+      throw err;
     }
   };
-  
 
   const logout = () => {
     sessionStorage.removeItem("token");
@@ -111,17 +101,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const token = sessionStorage.getItem("token");
+    const storedUser = localStorage.getItem("auth");
 
-    if (token) {
-      getUserProfile(token)
-        .then((user) => {
-          console.log("User fetched from profile:", user);
-          dispatch({ type: "LOGIN", payload: user });
-        })
-        .catch((err) => {
-          handleError(err);
-          logout();
-        });
+    if (token && storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        dispatch({ type: "LOGIN", payload: user });
+      } catch (error) {
+        console.error("Failed to parse user from localStorage:", error);
+        logout();
+      }
     }
   }, []);
 

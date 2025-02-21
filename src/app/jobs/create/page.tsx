@@ -1,3 +1,5 @@
+"use server";
+
 import CreateJobForm from "@/component/job/CreateJobForm";
 import FormContainer from "@/component/ui/form/FormContainer";
 
