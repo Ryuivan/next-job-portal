@@ -1,3 +1,5 @@
+"use server";
+
 import JobList from "@/component/job/JobList";
 import PageTitle from "@/component/ui/title/PageTitle";
 import { Box, Grid2, Typography } from "@mui/material";

@@ -1,7 +1,8 @@
+"use server"
+
 import { getJobAndUserNameByIdAction } from "@/app/lib/job/actions";
-import { formatRupiah } from "@/utils/formatNumberToIDR";
-import { formatPostedDate } from "@/utils/formatPostedDate";
-import { Box, Button, Container, Divider, Typography } from "@mui/material";
+import JobDetailCard from "@/component/job/JobDetailCard";
+import { Container, Typography } from "@mui/material";
 
 type JobDetailPageProps = {
   params: { id: string };
@@ -41,60 +42,16 @@ const JobDetailPage = async ({ params }: JobDetailPageProps) => {
         boxShadow: 1,
       }}
     >
-      <Box sx={{ marginBottom: "16px" }}>
-        <Typography fontSize="20px" fontWeight={600}>
-          {title ?? "No title provided"}
-        </Typography>
-        <Typography fontSize="12px" fontWeight={400} color="text.secondary">
-          Posted by {firstName ?? "Unknown"} {lastName ?? ""}{" "}
-          {updatedAt
-            ? `(${formatPostedDate(updatedAt)})`
-            : "(No date provided)"}
-        </Typography>
-      </Box>
-      <Divider />
-
-      <Box sx={{ marginTop: "16px" }}>
-        <Typography fontSize="16px" fontWeight={400} color="text.secondary">
-          Description:
-        </Typography>
-        <Typography fontSize="16px" fontWeight={400}>
-          {description ?? "No description available"}
-        </Typography>
-      </Box>
-
-      <Box sx={{ marginTop: "16px" }}>
-        <Typography fontSize="16px" fontWeight={400} color="text.secondary">
-          Category:
-        </Typography>
-        <Typography fontSize="16px" fontWeight={400}>
-          {category ?? "Not categorized"}
-        </Typography>
-      </Box>
-
-      <Box sx={{ marginTop: "16px" }}>
-        <Typography fontSize="16px" fontWeight={400} color="text.secondary">
-          Location:
-        </Typography>
-        <Typography fontSize="16px" fontWeight={400}>
-          {location ?? "Not provided"}
-        </Typography>
-      </Box>
-
-      {salary !== undefined && (
-        <Box sx={{ marginTop: "16px" }}>
-          <Typography fontSize="16px" fontWeight={400} color="text.secondary">
-            Salary:
-          </Typography>
-          <Typography fontSize="16px" fontWeight={400}>
-            {formatRupiah(salary)}
-          </Typography>
-        </Box>
-      )}
-
-      <Button variant="contained" sx={{ marginTop: "16px" }} fullWidth>
-        Apply
-      </Button>
+      <JobDetailCard
+        title={title ?? "No title provided"}
+        firstName={firstName ?? "Unknown"}
+        lastName={lastName}
+        updatedAt={updatedAt}
+        description={description ?? "No description available"}
+        category={category ?? "No category provided"}
+        location={location}
+        salary={salary}
+      />
     </Container>
   );
 };
