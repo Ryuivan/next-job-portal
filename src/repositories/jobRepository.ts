@@ -20,6 +20,41 @@ export const getJobsFromTable = async () => {
   }
 };
 
+export const getJobByIdFromTable = async (id: string): Promise<Job> => {
+  try {
+    const result: QueryResult<Job> = await query(
+      `SELECT id, user_id AS "userId", title, description, location, salary, category, created_at AS "createdAt", updated_at AS "updatedAt"
+       FROM jobs
+       WHERE id = $1`,
+      [id]
+    );
+
+    return result.rows[0];
+  } catch (err) {
+    console.error("Failed to fetch job:", err);
+    throw new Error("Failed to fetch job");
+  }
+};
+
+export const getJobByIdAndUserIdFromTable = async (
+  jobId: string,
+  userId: string
+): Promise<Job> => {
+  try {
+    const result: QueryResult<Job> = await query(
+      `SELECT id, user_id AS "userId", title, description, location, salary, category, created_at AS "createdAt", updated_at AS "updatedAt"
+       FROM jobs
+       WHERE id = $1 AND user_id = $2`,
+      [jobId, userId]
+    );
+
+    return result.rows[0];
+  } catch (err) {
+    console.error("Failed to fetch job:", err);
+    throw new Error("Failed to fetch job");
+  }
+};
+
 export const getJobsAndUserFromTable = async (): Promise<
   (Omit<Job, "userId"> & Pick<User, "firstName" | "lastName">)[]
 > => {
@@ -99,6 +134,22 @@ export const getJobsByUserIdFromTable = async (
   } catch (err) {
     console.error("Failed to fetch jobs:", err);
     throw new Error("Failed to fetch jobs");
+  }
+};
+
+export const getMyJobPostsFromTable = async (id: string) => {
+  try {
+    const result: QueryResult<Job> = await query(
+      `SELECT id, user_id AS "userId", title, description, location, salary, category, created_at AS "createdAt", updated_at AS "updatedAt"
+       FROM jobs 
+       WHERE user_id = $1`,
+      [id]
+    );
+
+    return result.rows;
+  } catch (err) {
+    console.error("Failed to fetch job:", err);
+    throw new Error("Failed to fetch job");
   }
 };
 
