@@ -16,6 +16,7 @@ import {
   Work,
   LibraryAdd,
   WorkHistory,
+  LocalPostOffice,
 } from "@mui/icons-material";
 import { ReactNode, useCallback, useMemo, useState } from "react";
 import SidebarDrawer from "./SidebarDrawer";
@@ -34,7 +35,8 @@ export type Route = {
 const Sidebar = () => {
   const [open, setOpen] = useState(false);
   const { state, logout } = useAuth();
-  const { isAuthenticated } = state;
+  const { isAuthenticated, user } = state;
+  const userId = user?.id;
   const router = useRouter();
 
   const drawerWidth = 300;
@@ -56,8 +58,15 @@ const Sidebar = () => {
   );
 
   const employerRoutes = useMemo<Route[]>(
-    () => [{ name: "Create Job", href: "/jobs/create", icon: <LibraryAdd /> }],
-    []
+    () => [
+      { name: "Create Job", href: "/jobs/create", icon: <LibraryAdd /> },
+      {
+        name: "My Job Post",
+        href: `/jobs/my/${userId}`,
+        icon: <LocalPostOffice />,
+      },
+    ],
+    [userId]
   );
 
   const jobseekerRoutes = useMemo<Route[]>(
