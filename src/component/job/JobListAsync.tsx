@@ -5,15 +5,16 @@ import { Box, Button, Typography } from "@mui/material";
 type JobListAsyncProps = {
   query?: string;
   currentPage?: number;
+  category?: string;
 };
 
-const JobListAsync = async ({ query, currentPage = 1 }: JobListAsyncProps) => {
+const JobListAsync = async ({ query, currentPage = 1, category }: JobListAsyncProps) => {
   const pageSize = 6;
 
   const response = await getFilteredJobsAndUserNameAction(
     query,
     currentPage,
-    pageSize
+    pageSize,category
   );
   const jobs = response.data ?? [];
   const total = response.total ?? 0;
@@ -36,6 +37,7 @@ const JobListAsync = async ({ query, currentPage = 1 }: JobListAsyncProps) => {
         query={query}
         pageSize={pageSize}
         totalPages={totalPages}
+        category={category}
       />
     </Box>
   );

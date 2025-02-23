@@ -89,7 +89,8 @@ export const getJobsAndUserFromTable = async (): Promise<
 export const getFilteredJobsAndUserFromTable = async (
   queryParam?: string,
   currentPage: number = 1,
-  pageSize: number = 6
+  pageSize: number = 6,
+  category?: string
 ): Promise<{
   data: (Omit<Job, "userId"> & Pick<User, "firstName" | "lastName">)[];
   total: number;
@@ -98,11 +99,14 @@ export const getFilteredJobsAndUserFromTable = async (
     const offset = (currentPage - 1) * pageSize;
     const searchQuery = queryParam ? `%${queryParam}%` : "%";
 
-    // Query for jobs with pagination and search
+    const categoryFilter = category ? `AND jobs.category ILIKE $2` : "";
+    const values = category
+      ? [searchQuery, `%${category}%`, pageSize, offset]
+      : [searchQuery, pageSize, offset];
+
     const result = await query(
       `SELECT 
         jobs.id,
-        jobs.user_id AS "userId",
         users.first_name AS "firstName",
         users.last_name AS "lastName",
         jobs.title,
@@ -114,29 +118,28 @@ export const getFilteredJobsAndUserFromTable = async (
         jobs.updated_at AS "updatedAt"
       FROM jobs
       JOIN users ON jobs.user_id = users.id
-      WHERE jobs.title ILIKE $1 OR jobs.description ILIKE $1
+      WHERE (jobs.title ILIKE $1 OR jobs.description ILIKE $1)
+      ${categoryFilter}
       ORDER BY jobs.updated_at DESC
-      LIMIT $2 OFFSET $3;`,
-      [searchQuery, pageSize, offset]
+      LIMIT $${category ? 3 : 2} OFFSET $${category ? 4 : 3};`,
+      values
     );
 
-    // Get total count for pagination
     const countResult = await query(
       `SELECT COUNT(*) AS total
-      FROM jobs
-      WHERE title ILIKE $1 OR description ILIKE $1;`,
-      [searchQuery]
+       FROM jobs
+       WHERE (title ILIKE $1 OR description ILIKE $1)
+       ${category ? `AND category ILIKE $2` : ""};`,
+      category ? [searchQuery, `%${category}%`] : [searchQuery]
     );
 
     const total = parseInt(countResult.rows[0].total, 10);
-
     return { data: result.rows, total };
   } catch (err) {
     console.error("Failed to fetch jobs:", err);
     throw new Error("Failed to fetch jobs");
   }
 };
-
 
 export const getJobAndUserByIdFromTable = async (
   id: string
@@ -202,6 +205,21 @@ export const getMyJobPostsFromTable = async (id: string) => {
   } catch (err) {
     console.error("Failed to fetch job:", err);
     throw new Error("Failed to fetch job");
+  }
+};
+
+export const getJobCategories = async (): Promise<string[]> => {
+  try {
+    const result: QueryResult<{ category: string }> = await query(
+      `SELECT DISTINCT category
+       FROM jobs
+       ORDER BY category`
+    );
+
+    return result.rows.map((row) => row.category);
+  } catch (err) {
+    console.error("Failed to fetch job categories:", err);
+    throw new Error("Failed to fetch job categories");
   }
 };
 

@@ -6,6 +6,7 @@ import {
   getJobAndUserByIdFromTable,
   getJobByIdAndUserIdFromTable,
   getJobByIdFromTable,
+  getJobCategories,
   getJobsAndUserFromTable,
   getJobsByUserIdFromTable,
   getMyJobPostsFromTable,
@@ -93,18 +94,46 @@ export const getJobByIdAction = async (
 };
 
 // Get All Jobs with User Name
+// export const getFilteredJobsAndUserNameAction = async (
+//   query?: string,
+//   currentPage: number = 1,
+//   pageSize: number = 5
+// ): Promise<ActionResponse<JobAndUserName[]>> => {
+//   try {
+//     const { data, total } = await getFilteredJobsAndUserFromTable(
+//       query,
+//       currentPage,
+//       pageSize
+//     );
+//     return { success: true, data, total }; // Pastikan `total` dikembalikan di sini
+//   } catch (error) {
+//     return {
+//       success: false,
+//       error: error instanceof Error ? error.message : "Failed to fetch jobs",
+//     };
+//   }
+// };
+
 export const getFilteredJobsAndUserNameAction = async (
   query?: string,
   currentPage: number = 1,
-  pageSize: number = 5
-): Promise<ActionResponse<JobAndUserName[]>> => {
+  pageSize: number = 6,
+  category?: string // Tambah kategori
+): Promise<{
+  success: boolean;
+  data?: any[];
+  total?: number;
+  error?: string;
+}> => {
   try {
     const { data, total } = await getFilteredJobsAndUserFromTable(
       query,
       currentPage,
-      pageSize
+      pageSize,
+      category 
     );
-    return { success: true, data, total }; // Pastikan `total` dikembalikan di sini
+
+    return { success: true, data, total };
   } catch (error) {
     return {
       success: false,
@@ -112,6 +141,7 @@ export const getFilteredJobsAndUserNameAction = async (
     };
   }
 };
+
 
 // Get Jobs by User ID
 export const getJobsByUserIdAction = async (
@@ -174,6 +204,23 @@ export const getMyJobPostAction = async (
     return {
       success: false,
       error: error instanceof Error ? error.message : "Failed to fetch job",
+    };
+  }
+};
+
+export const getJobCategoriesAction = async (): Promise<
+  ActionResponse<string[]>
+> => {
+  try {
+    const categories = await getJobCategories();
+    return { success: true, data: categories };
+  } catch (error) {
+    return {
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch job categories",
     };
   }
 };
