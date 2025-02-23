@@ -22,7 +22,9 @@ const JobsPage = async ({ searchParams }: JobsPageProps) => {
   return (
     <Box>
       <PageTitle title="Job List" />
-      <Stack direction="row" spacing={2} width="100%">
+      <Stack direction="row" spacing={2} width="100%" sx={{ 
+        marginBottom: "32px"
+       }}>
         <JobSearch />
         <JobCategoryFilter categories={categories} />
       </Stack>

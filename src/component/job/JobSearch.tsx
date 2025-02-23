@@ -21,23 +21,16 @@ const JobSearch = () => {
   };
 
   return (
-    <Box
-      sx={{
-        width: "100%",
-        marginBottom: "32px",
-      }}
-    >
-      <TextField
-        fullWidth
-        id="job-search"
-        label="Search Jobs"
-        type="text"
-        variant="outlined"
-        size="small"
-        onChange={(e) => handleSearch(e.target.value)}
-        defaultValue={searchParams.get("query")?.toString()}
-      />
-    </Box>
+    <TextField
+      fullWidth
+      id="job-search"
+      label="Search Jobs"
+      type="text"
+      variant="outlined"
+      size="medium"
+      onChange={(e) => handleSearch(e.target.value)}
+      defaultValue={searchParams.get("query")?.toString()}
+    />
   );
 };
 

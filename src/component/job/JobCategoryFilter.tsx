@@ -1,5 +1,6 @@
 "use client";
 
+import { Label } from "@mui/icons-material";
 import {
   FormControl,
   InputLabel,
@@ -20,7 +21,6 @@ const JobCategoryFilter = ({ categories }: JobCategoryFilterProps) => {
 
   const handleChange = (event: SelectChangeEvent<string>) => {
     const newCategory = event.target.value;
-    console.log("New category:" + typeof newCategory)
     const params = new URLSearchParams(searchParams.toString());
 
     if (newCategory) {
@@ -33,14 +33,17 @@ const JobCategoryFilter = ({ categories }: JobCategoryFilterProps) => {
   };
 
   return (
-    <FormControl>
-      <InputLabel id="category-select-label">Category</InputLabel>
+    <FormControl
+      sx={{
+        width: "350px",
+      }}
+    >
+      <InputLabel id="category-select">Category</InputLabel>
       <Select
-        labelId="category-select-label"
+        labelId="category-select"
+        label="Categories"
         value={currentCategory}
-        label="Category"
         onChange={handleChange}
-        displayEmpty
       >
         <MenuItem value="">All Categories</MenuItem>
         {categories.map((category) => (
