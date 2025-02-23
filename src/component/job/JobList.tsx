@@ -12,6 +12,7 @@ type JobListProps = {
   pageSize: number;
   currentPage: number;
   totalPages: number;
+  category?: string;
 };
 
 const JobList = ({ jobs, query, currentPage, totalPages }: JobListProps) => {
