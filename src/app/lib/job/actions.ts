@@ -2,6 +2,7 @@
 
 import {
   deleteJobFromTable,
+  getFilteredJobsAndUserFromTable,
   getJobAndUserByIdFromTable,
   getJobByIdAndUserIdFromTable,
   getJobByIdFromTable,
@@ -28,6 +29,7 @@ export type CreateJobActionRequest = {
 export type ActionResponse<T> = {
   success: boolean;
   data?: T;
+  total?: number;
   error?: string;
 };
 
@@ -91,12 +93,18 @@ export const getJobByIdAction = async (
 };
 
 // Get All Jobs with User Name
-export const getJobsAndUserNameAction = async (): Promise<
-  ActionResponse<JobAndUserName[]>
-> => {
+export const getFilteredJobsAndUserNameAction = async (
+  query?: string,
+  currentPage: number = 1,
+  pageSize: number = 5
+): Promise<ActionResponse<JobAndUserName[]>> => {
   try {
-    const jobsAndUsername = await getJobsAndUserFromTable();
-    return { success: true, data: jobsAndUsername };
+    const { data, total } = await getFilteredJobsAndUserFromTable(
+      query,
+      currentPage,
+      pageSize
+    );
+    return { success: true, data, total }; // Pastikan `total` dikembalikan di sini
   } catch (error) {
     return {
       success: false,

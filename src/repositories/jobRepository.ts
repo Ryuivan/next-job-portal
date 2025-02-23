@@ -86,6 +86,58 @@ export const getJobsAndUserFromTable = async (): Promise<
   }
 };
 
+export const getFilteredJobsAndUserFromTable = async (
+  queryParam?: string,
+  currentPage: number = 1,
+  pageSize: number = 6
+): Promise<{
+  data: (Omit<Job, "userId"> & Pick<User, "firstName" | "lastName">)[];
+  total: number;
+}> => {
+  try {
+    const offset = (currentPage - 1) * pageSize;
+    const searchQuery = queryParam ? `%${queryParam}%` : "%";
+
+    // Query for jobs with pagination and search
+    const result = await query(
+      `SELECT 
+        jobs.id,
+        jobs.user_id AS "userId",
+        users.first_name AS "firstName",
+        users.last_name AS "lastName",
+        jobs.title,
+        jobs.description,
+        jobs.location,
+        jobs.salary,
+        jobs.category,
+        jobs.created_at AS "createdAt",
+        jobs.updated_at AS "updatedAt"
+      FROM jobs
+      JOIN users ON jobs.user_id = users.id
+      WHERE jobs.title ILIKE $1 OR jobs.description ILIKE $1
+      ORDER BY jobs.updated_at DESC
+      LIMIT $2 OFFSET $3;`,
+      [searchQuery, pageSize, offset]
+    );
+
+    // Get total count for pagination
+    const countResult = await query(
+      `SELECT COUNT(*) AS total
+      FROM jobs
+      WHERE title ILIKE $1 OR description ILIKE $1;`,
+      [searchQuery]
+    );
+
+    const total = parseInt(countResult.rows[0].total, 10);
+
+    return { data: result.rows, total };
+  } catch (err) {
+    console.error("Failed to fetch jobs:", err);
+    throw new Error("Failed to fetch jobs");
+  }
+};
+
+
 export const getJobAndUserByIdFromTable = async (
   id: string
 ): Promise<Omit<Job, "userId"> & Pick<User, "firstName" | "lastName">> => {
