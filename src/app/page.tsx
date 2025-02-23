@@ -1,10 +1,14 @@
-import { Box, Typography } from "@mui/material";
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
+  const { replace } = useRouter();
 
-  return (
-    <Typography color="text.primary">
-      Hello World
-    </Typography>      
-  );
+  useEffect(() => {
+    replace("/jobs");
+  }, [replace]);
+
+  return null;
 }

@@ -50,10 +50,7 @@ const Sidebar = () => {
   };
 
   const routes = useMemo<Route[]>(
-    () => [
-      { name: "Home", href: "/", icon: <Home /> },
-      { name: "Jobs", href: "/jobs", icon: <Work /> },
-    ],
+    () => [{ name: "Jobs", href: "/jobs", icon: <Work /> }],
     []
   );
 

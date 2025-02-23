@@ -7,15 +7,19 @@ import Link from "next/link";
 import { deleteMyJobPostAction } from "@/app/lib/job/actions";
 import { formatRupiah } from "@/utils/formatNumberToIDR";
 import { makeSuccessToast } from "@/lib/toast/toast";
+import { useState } from "react";
 
 type JobTableBodyContentProps = {
   myJobPost: Job[] | undefined;
 };
 
 const JobTableBodyContent = ({ myJobPost }: JobTableBodyContentProps) => {
+  const [jobs, setJobs] = useState(myJobPost ?? []);
+
   const handleDelete = async (jobId: string, userId: string) => {
     try {
       await deleteMyJobPostAction(jobId, userId);
+      setJobs((prev) => prev.filter((job) => job.id !== jobId)); // Update state
       makeSuccessToast("Job post deleted successfully");
     } catch (error) {
       console.error(error);
@@ -24,23 +28,23 @@ const JobTableBodyContent = ({ myJobPost }: JobTableBodyContentProps) => {
 
   return (
     <>
-      {myJobPost !== undefined && myJobPost.length > 0 ? (
-        myJobPost.map((job) => (
+      {jobs.length > 0 ? (
+        jobs.map((job) => (
           <TableRow key={job.id}>
             <TableCell>{job.title}</TableCell>
-            <TableCell align="right">{job.description}</TableCell>
-            <TableCell align="right">{job.location}</TableCell>
-            <TableCell align="right">
+            <TableCell>{job.description}</TableCell>
+            <TableCell>{job.location}</TableCell>
+            <TableCell>
               {job.salary ? formatRupiah(job.salary) : "N/A"}
             </TableCell>
-            <TableCell align="right">{job.category}</TableCell>
-            <TableCell align="right">
+            <TableCell>{job.category}</TableCell>
+            <TableCell>
               {job.createdAt ? job.createdAt.toDateString() : "N/A"}
             </TableCell>
-            <TableCell align="right">
+            <TableCell>
               {job.updatedAt ? job.updatedAt.toDateString() : "N/A"}
             </TableCell>
-            <TableCell align="right">
+            <TableCell>
               <Stack direction="row" spacing={1} justifyContent="flex-end">
                 <Link href={`/jobs/my/${job.id}/edit`} passHref>
                   <Button variant="contained" color="warning">
