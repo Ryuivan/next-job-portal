@@ -93,27 +93,6 @@ export const getJobByIdAction = async (
   }
 };
 
-// Get All Jobs with User Name
-// export const getFilteredJobsAndUserNameAction = async (
-//   query?: string,
-//   currentPage: number = 1,
-//   pageSize: number = 5
-// ): Promise<ActionResponse<JobAndUserName[]>> => {
-//   try {
-//     const { data, total } = await getFilteredJobsAndUserFromTable(
-//       query,
-//       currentPage,
-//       pageSize
-//     );
-//     return { success: true, data, total }; // Pastikan `total` dikembalikan di sini
-//   } catch (error) {
-//     return {
-//       success: false,
-//       error: error instanceof Error ? error.message : "Failed to fetch jobs",
-//     };
-//   }
-// };
-
 export const getFilteredJobsAndUserNameAction = async (
   query?: string,
   currentPage: number = 1,
@@ -130,7 +109,7 @@ export const getFilteredJobsAndUserNameAction = async (
       query,
       currentPage,
       pageSize,
-      category 
+      category
     );
 
     return { success: true, data, total };
@@ -141,7 +120,6 @@ export const getFilteredJobsAndUserNameAction = async (
     };
   }
 };
-
 
 // Get Jobs by User ID
 export const getJobsByUserIdAction = async (
