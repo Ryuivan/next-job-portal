@@ -1,7 +1,7 @@
 import { AuthProvider } from "@/context/AuthContext";
 import { ReactNode } from "react";
 import ThemeRegistry from "../theme/ThemeRegistry";
-import { JobsProvider } from "@/context/JobContext";
+// import { JobsProvider } from "@/context/JobContext";
 
 const AppProvider = ({ children }: { children: ReactNode }) => {
   return (

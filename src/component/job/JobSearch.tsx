@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const JobSearch = () => {
